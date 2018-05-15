@@ -2,7 +2,9 @@ package com.xinyijia.backend.service;
 
 import com.xinyijia.backend.domain.UserInfo;
 import com.xinyijia.backend.param.request.LoginRequest;
+import com.xinyijia.backend.param.request.UserUpdateRequest;
 import com.xinyijia.backend.param.response.LoginResponse;
+import com.xinyijia.backend.param.response.UserInfoResponse;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,4 +24,8 @@ public interface UserService {
     LoginResponse login(LoginRequest loginRequest);
 
     boolean isLogin(String accessToken);
+
+    UserInfoResponse getUserInfo(String accessToken);
+
+    Integer updateUserInfo(UserUpdateRequest userUpdateRequest);
 }

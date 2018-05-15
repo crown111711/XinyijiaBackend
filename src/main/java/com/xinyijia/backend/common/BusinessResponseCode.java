@@ -7,6 +7,11 @@ package com.xinyijia.backend.common;
  */
 public interface BusinessResponseCode {
     int SUCCESS = 0;
+
+    int ERROR = 1;
+
+    int USER_NOT_LOGIN = 44;
+
     int CAPTCHA_ERROR = 88;
     int USER_NAME_EXIST = 99;
 

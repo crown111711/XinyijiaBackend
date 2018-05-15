@@ -129,7 +129,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<overwrite>false</overwrite>
+					<overwrite>true</overwrite>
 				</configuration>
 			</plugin>
 

@@ -7,18 +7,27 @@ import com.xinyijia.backend.mapper.UserInfoMapper;
 import com.xinyijia.backend.param.CaptchaCache;
 import com.xinyijia.backend.param.TokenCache;
 import com.xinyijia.backend.param.request.LoginRequest;
+import com.xinyijia.backend.param.request.UserUpdateRequest;
 import com.xinyijia.backend.param.response.LoginResponse;
+import com.xinyijia.backend.param.response.UserInfoResponse;
 import com.xinyijia.backend.service.TokenCacheService;
 import com.xinyijia.backend.service.UserService;
 import com.xinyijia.backend.utils.MailSenderInfo;
 import com.xinyijia.backend.utils.MailUtils;
 import com.xinyijia.backend.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -129,5 +138,51 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public UserInfoResponse getUserInfo(String accessToken) {
+        UserInfoResponse response = new UserInfoResponse();
+        TokenCache tokenCache = tokenCacheService.getCache(accessToken);
+        if (tokenCache == null) {
+            response.setCode(BusinessResponseCode.USER_NOT_LOGIN);
+            return response;
+        }
+        String userName = tokenCache.getUserName();
+        int uid = tokenCache.getUid();
+        UserInfo userInfo = userInfoMapper.selectByPrimaryKey(uid);
+        BeanUtils.copyProperties(userInfo, response);
+        return response;
+    }
+
+    @Override
+    public Integer updateUserInfo(UserUpdateRequest userUpdateRequest) {
+        try {
+            if (userUpdateRequest == null || StringUtils.isEmpty(userUpdateRequest.getAccessToken())) {
+                return BusinessResponseCode.USER_NOT_LOGIN;
+            }
+            TokenCache tokenCache = tokenCacheService.getCache(userUpdateRequest.getAccessToken());
+            if (tokenCache == null || !Objects.equals(userUpdateRequest.getUserName(), userUpdateRequest.getUserName())) {
+                return BusinessResponseCode.USER_NOT_LOGIN;
+            }
+
+            int uid = tokenCache.getUid();
+            UserInfo update = new UserInfo();
+            BeanUtils.copyProperties(userUpdateRequest, update);
+
+            //生日格式调整
+            String fdDate = update.getBirthday().replace("Z", " UTC");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
+            Date date = dateFormat.parse(fdDate );
+            SimpleDateFormat dfFormat = new SimpleDateFormat("yyyy-MM-dd");
+            update.setBirthday(dfFormat.format(date));
+
+            update.setId(uid);
+            int result = userInfoMapper.updateBasicUserInfo(update);
+            return BusinessResponseCode.SUCCESS;
+        } catch (Exception e) {
+            log.error("更新数据异常",e);
+            return BusinessResponseCode.ERROR;
+        }
     }
 }
