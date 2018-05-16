@@ -17,4 +17,6 @@ public interface BusinessResponseCode {
 
     int CODE_ALREADY_SEND = 88;
     int CODE_SEND_ERROR = 99;
+
+    String OPERATE_SUCCESS_MSG = "操作成功";
 }

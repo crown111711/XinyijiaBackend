@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Properties;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class XinyijiaBackendApplicationTests {
@@ -46,4 +48,18 @@ public class XinyijiaBackendApplicationTests {
 
 	}
 
+	@Test
+	public void getProperty(){
+		Properties props = System.getProperties();
+		System.out.println(props.getProperty("os.name"));
+		System.out.println(System.getProperty("os.name" ));
+	}
+
+	@Test
+	public void testStringSub() {
+		String name = "http://localhost:8090/xyj/api/attachment/showImage/ddf";
+		int index = name.lastIndexOf("/");
+		String name1 = name.substring(index + 1);
+		System.out.println(name1);
+	}
 }

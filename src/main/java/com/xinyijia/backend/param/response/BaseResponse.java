@@ -11,4 +11,5 @@ import lombok.Data;
 @Data
 public class BaseResponse {
     public Integer code;
+    public String msg;
 }
