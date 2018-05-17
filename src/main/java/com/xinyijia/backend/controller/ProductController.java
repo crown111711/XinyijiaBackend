@@ -4,6 +4,8 @@ import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.domain.BusinessInfo;
 import com.xinyijia.backend.domain.ProductInfo;
+import com.xinyijia.backend.param.BusinessResponse;
+import com.xinyijia.backend.param.ProductResponse;
 import com.xinyijia.backend.param.request.LoginRequest;
 import com.xinyijia.backend.param.response.BaseResponse;
 import com.xinyijia.backend.param.response.LoginResponse;
@@ -41,6 +43,76 @@ public class ProductController {
         return response;
     }
 
+    @ApiOperation(value = "更新商品信息", notes = "")
+    @RequestMapping(value = "updateProduct", method = RequestMethod.POST)
+    public BaseResponse updateProduct(@RequestBody ProductInfo productInfo) throws Exception {
+        try {
+            productService.updateProduct(productInfo);
+            BaseResponse response = new BaseResponse();
+            return response;
+        } catch (Exception e) {
+            log.error("更新商品信息失败", e);
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+
+    @ApiOperation(value = "获取所有的产品", notes = "")
+    @RequestMapping(value = "getAllProducts", method = RequestMethod.GET)
+    public BaseResponse getAllProducts() {
+        BaseResponse baseResponse = new BaseResponse();
+        List<ProductResponse> productResponses = productService.getAllProducts();
+        baseResponse.setCode(BusinessResponseCode.SUCCESS);
+        baseResponse.setData(productResponses);
+        return baseResponse;
+    }
+
+    @ApiOperation(value = "删除产品", notes = "")
+    @RequestMapping(value = "/deleteProduct", method = RequestMethod.GET)
+    public BaseResponse deleteProduct(@RequestParam("id") Integer id) {
+        try {
+            productService.deleteProduct(id);
+            return new BaseResponse(BusinessResponseCode.SUCCESS);
+        } catch (Exception e) {
+            log.error("删除异常", e);
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+
+    }
+
+    @ApiOperation(value = "删除业务线", notes = "")
+    @RequestMapping(value = "/deleteBusiness", method = RequestMethod.GET)
+    public BaseResponse deleteBusiness(@RequestParam("id") Integer id) {
+        try {
+            int code = productService.deleteBusiness(id);
+            BaseResponse baseResponse = new BaseResponse(code);
+            if (code == 1) {
+                baseResponse.setMsg("该业务线下还有商品，请先处理");
+            }
+            return baseResponse;
+        } catch (Exception e) {
+            log.error("删除异常", e);
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "查询产品", notes = "")
+    @RequestMapping(value = "searchProducts", method = RequestMethod.GET)
+    public BaseResponse searchProducts(@RequestParam("searchParam") String searcParams) {
+        // 商品名  商品关键字  商品类型
+        BaseResponse baseResponse = new BaseResponse();
+        try {
+            List<ProductResponse> products = productService.searchProducts(searcParams);
+            baseResponse.setCode(BusinessResponseCode.SUCCESS);
+            baseResponse.setData(products);
+        } catch (Exception e) {
+            log.error("查询商品失败", e);
+            baseResponse.setCode(BusinessResponseCode.ERROR);
+        }
+        return baseResponse;
+    }
+
+
     @ApiOperation(value = "得到所有的业务线", notes = "")
     @RequestMapping(value = "getAllBusiness", method = RequestMethod.GET)
     public List<BusinessInfo> getAllBusiness() {
@@ -49,19 +121,31 @@ public class ProductController {
 
     @ApiOperation(value = "添加业务线", notes = "")
     @RequestMapping(value = "addBusiness", method = RequestMethod.POST)
-    public BaseResponse addBusiness(@RequestBody BusinessInfo businessInfo) {
+    public BaseResponse addBusiness(@RequestBody BusinessInfo businessInfo) throws Exception {
 
         try {
             BaseResponse response = new BaseResponse();
-            productService.addBusiness(businessInfo);
+            Integer id = productService.addBusiness(businessInfo);
             response.setMsg(BusinessResponseCode.OPERATE_SUCCESS_MSG);
+            response.setCode(BusinessResponseCode.SUCCESS);
+            if (id != null) {
+                response.setData(id);
+            }
             return response;
         } catch (Exception e) {
             BaseResponse response = new BaseResponse();
+            response.setCode(BusinessResponseCode.ERROR);
             response.setMsg("业务线不能重名");
             return response;
         }
     }
 
+    @ApiOperation(value = "修改业务线", notes = "")
+    @RequestMapping(value = "updateBusiness", method = RequestMethod.POST)
+    public BaseResponse updateBusiness(@RequestBody BusinessInfo businessInfo) throws Exception {
+        BaseResponse baseResponse = new BaseResponse(BusinessResponseCode.SUCCESS, BusinessResponseCode.OPERATE_SUCCESS_MSG);
+        productService.updateBusiness(businessInfo);
+        return baseResponse;
+    }
 
 }

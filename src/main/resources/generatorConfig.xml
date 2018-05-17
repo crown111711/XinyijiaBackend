@@ -16,7 +16,7 @@
 
         <javaClientGenerator type="XMLMAPPER" targetPackage="com.xinyijia.backend.mapper" targetProject="src/main/java" />
 
-       <table tableName="business_info"/>
+       <table tableName="news_info"/>
 
 
 

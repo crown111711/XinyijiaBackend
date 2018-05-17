@@ -15,4 +15,5 @@ public class LoginResponse extends BaseResponse {
     private String accessToken;
     private Integer uid;
     private boolean status;
+    private boolean isAdmin;
 }

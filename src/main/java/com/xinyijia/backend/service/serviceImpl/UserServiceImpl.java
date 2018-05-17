@@ -1,6 +1,7 @@
 package com.xinyijia.backend.service.serviceImpl;
 
 import com.xinyijia.backend.common.BusinessResponseCode;
+import com.xinyijia.backend.common.UserCategory;
 import com.xinyijia.backend.domain.UserInfo;
 import com.xinyijia.backend.domain.UserInfoExample;
 import com.xinyijia.backend.mapper.UserInfoMapper;
@@ -128,7 +129,15 @@ public class UserServiceImpl implements UserService {
         tokenCache.setAccessToken(tokenId);
         tokenCache.setSessionId(loginRequest.getSessionId());
         tokenCacheService.putCache(tokenId, tokenCache);
-        return LoginResponse.builder().status(true).userName(userName).uid(userInfo.getId()).accessToken(tokenId).build();
+        LoginResponse.LoginResponseBuilder builder = LoginResponse.builder()
+                .status(true)
+                .userName(userName)
+                .uid(userInfo.getId())
+                .accessToken(tokenId);
+        if (UserCategory.ADMIN.name().equals(userInfo.getCategory())) {
+            builder.isAdmin(true);
+        }
+        return builder.build();
     }
 
     @Override
@@ -173,7 +182,7 @@ public class UserServiceImpl implements UserService {
             //生日格式调整
             String fdDate = update.getBirthday().replace("Z", " UTC");
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
-            Date date = dateFormat.parse(fdDate );
+            Date date = dateFormat.parse(fdDate);
             SimpleDateFormat dfFormat = new SimpleDateFormat("yyyy-MM-dd");
             update.setBirthday(dfFormat.format(date));
 
@@ -181,7 +190,7 @@ public class UserServiceImpl implements UserService {
             int result = userInfoMapper.updateBasicUserInfo(update);
             return BusinessResponseCode.SUCCESS;
         } catch (Exception e) {
-            log.error("更新数据异常",e);
+            log.error("更新数据异常", e);
             return BusinessResponseCode.ERROR;
         }
     }
