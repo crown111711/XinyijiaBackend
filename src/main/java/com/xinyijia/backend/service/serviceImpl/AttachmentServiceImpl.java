@@ -42,6 +42,7 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     public void saveAttachment(AttachmentInfo attachment) {
+        attachment.setCreateTime(System.currentTimeMillis());
         attachmentInfoMapper.insert(attachment);
     }
 

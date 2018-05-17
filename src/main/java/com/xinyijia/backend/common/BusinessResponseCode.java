@@ -19,4 +19,6 @@ public interface BusinessResponseCode {
     int CODE_SEND_ERROR = 99;
 
     String OPERATE_SUCCESS_MSG = "操作成功";
+
+    String ADD_NEWS_SUCCESS =" 添加新闻成功";
 }
