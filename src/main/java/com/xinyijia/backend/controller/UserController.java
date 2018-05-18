@@ -15,13 +15,11 @@ import com.xinyijia.backend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.omg.CORBA.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Created by tanjia on 2018/5/12.
@@ -147,7 +145,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "添加到购物车", notes = "")
-    @RequestMapping(value = "addBuyCar", method = RequestMethod.POST)
+    @RequestMapping(value = "/addBuyCar", method = RequestMethod.POST)
     @NotNull
     public BaseResponse addBuyCar(@RequestBody BuyCar buyCar) {
         try {
@@ -188,8 +186,7 @@ public class UserController {
 
 
     @ApiOperation(value = "购买商品", notes = "")
-    @RequestMapping(value = "buyProduct", method = RequestMethod.POST)
-    @NotNull
+    @RequestMapping(value = "/buyProduct", method = RequestMethod.POST)
     public BaseResponse buyProduct(@RequestBody TradeRequest tradeRequest) {
         try {
             BaseResponse baseResponse = BaseResponse.success();

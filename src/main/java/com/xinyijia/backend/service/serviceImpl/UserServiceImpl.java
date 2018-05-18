@@ -7,10 +7,7 @@ import com.xinyijia.backend.mapper.BuyCarMapper;
 import com.xinyijia.backend.mapper.ProductInfoMapper;
 import com.xinyijia.backend.mapper.TradeInfoMapper;
 import com.xinyijia.backend.mapper.UserInfoMapper;
-import com.xinyijia.backend.param.BuyCarResponse;
-import com.xinyijia.backend.param.CaptchaCache;
-import com.xinyijia.backend.param.TokenCache;
-import com.xinyijia.backend.param.TradeResponse;
+import com.xinyijia.backend.param.*;
 import com.xinyijia.backend.param.request.LoginRequest;
 import com.xinyijia.backend.param.request.RechargeRequest;
 import com.xinyijia.backend.param.request.TradeRequest;
@@ -23,8 +20,6 @@ import com.xinyijia.backend.utils.MailSenderInfo;
 import com.xinyijia.backend.utils.MailUtils;
 import com.xinyijia.backend.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -153,8 +148,10 @@ public class UserServiceImpl implements UserService {
                 .userName(userName)
                 .uid(userInfo.getId())
                 .accessToken(tokenId);
-        if (UserCategory.ADMIN.name().equals(userInfo.getCategory())) {
+        if (UserCategory.ADMIN.name().equalsIgnoreCase(userInfo.getCategory())) {
             builder.isAdmin(true);
+        } else {
+            builder.isAdmin(false);
         }
         return builder.build();
     }
@@ -253,7 +250,7 @@ public class UserServiceImpl implements UserService {
         }
 
         int count = 0;
-        for (TradeRequest.TradeSubRequest request : tradeRequest.getTrades()) {
+        for (TradeSubRequest request : tradeRequest.getTrades()) {
             count += request.getQuantity() * request.getPrice();
         }
         //账户的分布式管理 考虑并发、事务等相关问题，这里暂时不考虑
@@ -266,12 +263,13 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        for (TradeRequest.TradeSubRequest request : tradeRequest.getTrades()) {
+        for (TradeSubRequest request : tradeRequest.getTrades()) {
             //生成订单
             TradeInfo tradeInfo = new TradeInfo();
             BeanUtils.copyProperties(request, tradeInfo);
             tradeInfo.setId(null);
             tradeInfo.setUserId(uid);
+            tradeInfo.setCreatetime(System.currentTimeMillis());
             tradeInfoMapper.insert(tradeInfo);
 
             //扣减库存
@@ -279,6 +277,7 @@ public class UserServiceImpl implements UserService {
             ProductInfo updateQuantity = new ProductInfo();
             updateQuantity.setId(request.getProductId());
             updateQuantity.setQuantity(productInfo.getQuantity() - request.getQuantity());
+            updateQuantity.setSellNum(productInfo.getSellNum() + updateQuantity.getSellNum());
             productInfoMapper.updateByPrimaryKeySelective(updateQuantity);
 
             //删减购物车信息

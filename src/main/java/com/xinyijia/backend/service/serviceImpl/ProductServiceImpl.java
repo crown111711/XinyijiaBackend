@@ -70,8 +70,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> searchProducts(String searchIndex) {
+    public List<ProductResponse> searchProducts(String searchIndex, String searchBusiness) {
         ProductInfoExample productInfoExample = new ProductInfoExample();
+        if (StringUtils.isNotBlank(searchBusiness) && !Objects.equals("全部商品", searchBusiness)) {
+            BusinessInfoExample query = new BusinessInfoExample();
+            query.createCriteria().andBusinessNameEqualTo(searchBusiness);
+            List<BusinessInfo> businessInfos = businessInfoMapper.selectByExample(query);
+            if (CollectionUtils.isEmpty(businessInfos)) {
+                return null;
+            }
+            int bzId = businessInfos.get(0).getId();
+            productInfoExample.createCriteria().andBusinessIdEqualTo(bzId);
+        }
+
         try {
             Integer businessId = Integer.parseInt(searchIndex);
             productInfoExample.or().andBusinessIdEqualTo(businessId);

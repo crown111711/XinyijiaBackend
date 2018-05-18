@@ -1,5 +1,6 @@
 package com.xinyijia.backend.param.request;
 
+import com.xinyijia.backend.param.TradeSubRequest;
 import lombok.Data;
 
 import java.util.List;
@@ -15,13 +16,6 @@ public class TradeRequest {
     private String accessToken;
     List<TradeSubRequest> trades;
 
-    @Data
-    public class TradeSubRequest{
-        private int id;
-        private String productName;
-        private Integer quantity;
-        private Integer price;
-        private Integer productId;
-    }
+
 
 }

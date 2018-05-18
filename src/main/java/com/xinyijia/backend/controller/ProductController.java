@@ -106,11 +106,12 @@ public class ProductController {
 
     @ApiOperation(value = "查询产品", notes = "")
     @RequestMapping(value = "searchProducts", method = RequestMethod.GET)
-    public BaseResponse searchProducts(@RequestParam("searchParam") String searcParams) {
+    public BaseResponse searchProducts(@RequestParam("searchParam") String searcParams,
+                                       @RequestParam(name ="searchBusiness",required = false)String searchBusiness) {
         // 商品名  商品关键字  商品类型
         BaseResponse baseResponse = new BaseResponse();
         try {
-            List<ProductResponse> products = productService.searchProducts(searcParams);
+            List<ProductResponse> products = productService.searchProducts(searcParams,searchBusiness);
             baseResponse.setCode(BusinessResponseCode.SUCCESS);
             baseResponse.setData(products);
         } catch (Exception e) {

@@ -23,7 +23,7 @@ public interface ProductService {
 
     void updateBusiness(BusinessInfo businessInfo);
 
-    List<ProductResponse> searchProducts(String searchIndex);
+    List<ProductResponse> searchProducts(String searchIndex,String searchBusiness);
 
     List<ProductResponse> getProductInBusiness(String businessName,Integer businessId,Integer productId);
 
