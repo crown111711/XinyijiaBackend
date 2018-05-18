@@ -1,5 +1,6 @@
 package com.xinyijia.backend.param.response;
 
+import com.xinyijia.backend.common.BusinessResponseCode;
 import lombok.Builder;
 import lombok.Data;
 
@@ -33,5 +34,11 @@ public class BaseResponse<T> {
     public BaseResponse(Integer code, String mag) {
         this.code = code;
         this.msg = msg;
+    }
+    public static BaseResponse success(){
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setCode(BusinessResponseCode.SUCCESS);
+        baseResponse.setMsg(BusinessResponseCode.OPERATE_SUCCESS_MSG);
+        return baseResponse;
     }
 }

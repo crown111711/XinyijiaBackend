@@ -17,4 +17,5 @@ public class UserInfoResponse extends BaseResponse {
     private String address;
     private String birthday;
     private String imageIcon;
+    private Long balance;
 }

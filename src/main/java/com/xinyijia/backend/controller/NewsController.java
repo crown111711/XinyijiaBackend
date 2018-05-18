@@ -39,13 +39,41 @@ public class NewsController {
         return response;
     }
 
-    @ApiOperation(value = "添加新闻", notes = "")
+    @ApiOperation(value = "修改新闻", notes = "")
+    @RequestMapping(value = "/updateNews", method = RequestMethod.POST)
+    public BaseResponse updateNews(@RequestBody NewsInfo newsInfo){
+        try{
+            newsService.updateNews(newsInfo);
+            return new BaseResponse(BusinessResponseCode.SUCCESS);
+        }catch (Exception e){
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "获取新闻", notes = "")
     @RequestMapping(value = "/getNews", method = RequestMethod.GET)
-    public BaseResponse getNews(@RequestParam(name = "category", required = false) String category) {
+    public BaseResponse getNews(@RequestParam(name = "category", required = false) String category,
+                                @RequestParam(name = "lastId",required = false)Integer lastId,
+                                @RequestParam(name = "pageSize",required = false)Integer pageSize,
+                                @RequestParam(name = "direction",required = false)String direction) {
         try {
             BaseResponse baseResponse = new BaseResponse();
             List<NewsResponse> newsResponseList = newsService.getNews(category);
             baseResponse.setData(newsResponseList);
+            baseResponse.setCode(BusinessResponseCode.SUCCESS);
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+
+    @ApiOperation(value = "获取新闻", notes = "")
+    @RequestMapping(value = "/getNews/{id}", method = RequestMethod.GET)
+    public BaseResponse getNewsById(@PathVariable("id") Integer id) {
+        try {
+            BaseResponse baseResponse = new BaseResponse();
+            baseResponse.setData(newsService.getNewsById(id));
             baseResponse.setCode(BusinessResponseCode.SUCCESS);
             return baseResponse;
         } catch (Exception e) {

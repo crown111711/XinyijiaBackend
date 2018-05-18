@@ -1,13 +1,14 @@
 package com.xinyijia.backend.service.serviceImpl;
 
-import com.xinyijia.backend.domain.BusinessInfo;
-import com.xinyijia.backend.domain.BusinessInfoExample;
-import com.xinyijia.backend.domain.ProductInfo;
-import com.xinyijia.backend.domain.ProductInfoExample;
+import com.google.common.collect.Lists;
+import com.xinyijia.backend.domain.*;
 import com.xinyijia.backend.mapper.BusinessInfoMapper;
 import com.xinyijia.backend.mapper.ProductInfoMapper;
+import com.xinyijia.backend.mapper.UserInfoMapper;
 import com.xinyijia.backend.param.ProductResponse;
+import com.xinyijia.backend.param.TokenCache;
 import com.xinyijia.backend.service.ProductService;
+import com.xinyijia.backend.service.TokenCacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +33,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     BusinessInfoMapper businessInfoMapper;
+
+    @Autowired
+    TokenCacheService tokenCacheService;
+
+    @Autowired
+    UserInfoMapper userInfoMapper;
 
     @Override
     public void addProduct(ProductInfo productInfo) {
@@ -79,7 +87,63 @@ public class ProductServiceImpl implements ProductService {
         return convertProduct(productInfos);
     }
 
+    @Override
+    public List<ProductResponse> getProductInBusiness(String businessName, Integer businessId, Integer productId) {
+        if (productId != null && productId != 0) {
+            return convertProduct(Lists.newArrayList(productInfoMapper.selectByPrimaryKey(productId)));
+        }
+        if (StringUtils.isNotBlank(businessName)) {
+            if (Objects.equals("全部商品", businessName)) {
+                return getAllProducts();
+            }
+            BusinessInfoExample query = new BusinessInfoExample();
+            query.createCriteria().andBusinessNameEqualTo(businessName);
+            List<BusinessInfo> businessInfos = businessInfoMapper.selectByExample(query);
+            if (CollectionUtils.isEmpty(businessInfos)) {
+                return null;
+            }
+            businessId = businessInfos.get(0).getId();
+        }
+        ProductInfoExample productInfoExample = new ProductInfoExample();
+        productInfoExample.createCriteria().andBusinessIdEqualTo(businessId);
+        return convertProduct(productInfoMapper.selectByExample(productInfoExample));
+    }
+
+    @Override
+    public List<ProductResponse> recommendProducts(String accessToken) {
+        TokenCache tokenCache = tokenCacheService.getCache(accessToken);
+        List<ProductInfo> productInfos = Lists.newArrayList();
+        if (tokenCache != null) {
+            Integer uid = tokenCache.getUid();
+            UserInfo userInfo = userInfoMapper.selectByPrimaryKey(uid);
+            if (StringUtils.isNotBlank(userInfo.getViewProducts())) {
+                String[] productIds = userInfo.getViewProducts().split(":");
+                for (String productId : productIds) {
+                    productInfos.add(productInfoMapper.selectByPrimaryKey(Integer.parseInt(productId)));
+                }
+            }
+        }
+        if (productInfos.size() < 10) {
+            List<ProductInfo> views = productInfoMapper.selectByExample(new ProductInfoExample());
+            if (!CollectionUtils.isEmpty(views)) {
+
+
+                int lenght = 10 - productInfos.size();
+                if (views.size() < lenght) {
+                    lenght = views.size();
+                }
+                for (int i = 0; i < lenght; i++) {
+                    productInfos.add(views.get(i));
+                }
+            }
+        }
+        return convertProduct(productInfos);
+    }
+
     private List<ProductResponse> convertProduct(List<ProductInfo> productInfos) {
+        if (CollectionUtils.isEmpty(productInfos)) {
+            return null;
+        }
         List<ProductResponse> productResponses = productInfos.stream().map(
                 p -> {
                     ProductResponse response = new ProductResponse();

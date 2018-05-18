@@ -1,5 +1,6 @@
 package com.xinyijia.backend.service.serviceImpl;
 
+import com.google.common.collect.Lists;
 import com.xinyijia.backend.domain.NewsInfo;
 import com.xinyijia.backend.domain.NewsInfoExample;
 import com.xinyijia.backend.mapper.NewsInfoMapper;
@@ -54,6 +55,21 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public void deleteNews(Integer id) {
         newsInfoMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public void updateNews(NewsInfo newsInfo) {
+        newsInfoMapper.updateByPrimaryKeyWithBLOBs(newsInfo);
+    }
+
+    @Override
+    public NewsResponse getNewsById(Integer id) {
+        NewsInfo newsInfo = newsInfoMapper.selectByPrimaryKey(id);
+        if (newsInfo == null) {
+            return null;
+        }
+        return convert(Lists.newArrayList(newsInfo)).get(0);
+
     }
 
     private List<NewsResponse> convert(List<NewsInfo> newsInfos) {

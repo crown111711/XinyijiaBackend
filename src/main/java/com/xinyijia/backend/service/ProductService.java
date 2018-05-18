@@ -3,6 +3,7 @@ package com.xinyijia.backend.service;
 import com.xinyijia.backend.domain.BusinessInfo;
 import com.xinyijia.backend.domain.ProductInfo;
 import com.xinyijia.backend.param.ProductResponse;
+import com.xinyijia.backend.param.request.TradeRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,10 @@ public interface ProductService {
 
     List<ProductResponse> searchProducts(String searchIndex);
 
+    List<ProductResponse> getProductInBusiness(String businessName,Integer businessId,Integer productId);
+
+    List<ProductResponse> recommendProducts(String accessToken);
+
     List<ProductResponse> getAllProducts();
 
     void deleteProduct(int id);
@@ -31,4 +36,5 @@ public interface ProductService {
     void updateProduct(ProductInfo productInfo);
 
     int deleteBusiness(int id);
+
 }

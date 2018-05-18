@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
 import com.xinyijia.backend.param.TokenCache;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +45,9 @@ public class TokenCacheService {
     }
 
     public TokenCache getCache(String tokenId) {
+        if (StringUtils.isBlank(tokenId)) {
+            return null;
+        }
         try {
             Optional<TokenCache> tokenCache = cache.getIfPresent(tokenId);
             if (tokenCache == null) {

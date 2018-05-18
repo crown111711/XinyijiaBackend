@@ -2,12 +2,18 @@ package com.xinyijia.backend.service.serviceImpl;
 
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.common.UserCategory;
-import com.xinyijia.backend.domain.UserInfo;
-import com.xinyijia.backend.domain.UserInfoExample;
+import com.xinyijia.backend.domain.*;
+import com.xinyijia.backend.mapper.BuyCarMapper;
+import com.xinyijia.backend.mapper.ProductInfoMapper;
+import com.xinyijia.backend.mapper.TradeInfoMapper;
 import com.xinyijia.backend.mapper.UserInfoMapper;
+import com.xinyijia.backend.param.BuyCarResponse;
 import com.xinyijia.backend.param.CaptchaCache;
 import com.xinyijia.backend.param.TokenCache;
+import com.xinyijia.backend.param.TradeResponse;
 import com.xinyijia.backend.param.request.LoginRequest;
+import com.xinyijia.backend.param.request.RechargeRequest;
+import com.xinyijia.backend.param.request.TradeRequest;
 import com.xinyijia.backend.param.request.UserUpdateRequest;
 import com.xinyijia.backend.param.response.LoginResponse;
 import com.xinyijia.backend.param.response.UserInfoResponse;
@@ -22,6 +28,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author tanjia
@@ -44,6 +53,16 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TokenCacheService tokenCacheService;
+
+    @Autowired
+    private TradeInfoMapper tradeInfoMapper;
+
+    @Autowired
+    private ProductInfoMapper productInfoMapper;
+
+    @Autowired
+    private BuyCarMapper buyCarMapper;
+
 
     private static ConcurrentHashMap<String, CaptchaCache> captchaCodeU = new ConcurrentHashMap<>();
 
@@ -193,5 +212,152 @@ public class UserServiceImpl implements UserService {
             log.error("更新数据异常", e);
             return BusinessResponseCode.ERROR;
         }
+    }
+
+    @Override
+    public int recharge(RechargeRequest rechargeRequest) {
+        TokenCache tokenCache = tokenCacheService.getCache(rechargeRequest.getAccessToken());
+        if (tokenCache == null) {
+            return BusinessResponseCode.USER_NOT_LOGIN;
+        }
+        int uid = tokenCache.getUid();
+        UserInfo update = new UserInfo();
+        update.setBalance(rechargeRequest.getBalance());
+        update.setId(uid);
+        userInfoMapper.updateByPrimaryKeySelective(update);
+        return 0;
+    }
+
+    @Override
+    public List<TradeResponse> getTradesInfos(String accessToken) {
+        TokenCache tokenCache = tokenCacheService.getCache(accessToken);
+        if (tokenCache == null) {
+            return null;
+        }
+        int uid = tokenCache.getUid();
+        TradeInfoExample tradeInfoExample = new TradeInfoExample();
+        tradeInfoExample.createCriteria().andUserIdEqualTo(uid);
+        return convertTrade(tradeInfoMapper.selectByExample(tradeInfoExample), tokenCache);
+    }
+
+    @Override
+    @Transactional
+    public int buyProduct(TradeRequest tradeRequest) {
+        if (tradeRequest == null || CollectionUtils.isEmpty(tradeRequest.getTrades())) {
+            return 0;
+        }
+
+        TokenCache tokenCache = tokenCacheService.getCache(tradeRequest.getAccessToken());
+        if (tokenCache == null) {
+            return BusinessResponseCode.USER_NOT_LOGIN;
+        }
+
+        int count = 0;
+        for (TradeRequest.TradeSubRequest request : tradeRequest.getTrades()) {
+            count += request.getQuantity() * request.getPrice();
+        }
+        //账户的分布式管理 考虑并发、事务等相关问题，这里暂时不考虑
+
+        int uid = tokenCache.getUid();
+        UserInfo userInfo = userInfoMapper.selectByPrimaryKey(uid);
+        if (userInfo.getBalance() == null || userInfo.getBalance() < count) {
+            //账户余额不够
+            return 1;
+        }
+
+
+        for (TradeRequest.TradeSubRequest request : tradeRequest.getTrades()) {
+            //生成订单
+            TradeInfo tradeInfo = new TradeInfo();
+            BeanUtils.copyProperties(request, tradeInfo);
+            tradeInfo.setId(null);
+            tradeInfo.setUserId(uid);
+            tradeInfoMapper.insert(tradeInfo);
+
+            //扣减库存
+            ProductInfo productInfo = productInfoMapper.selectByPrimaryKey(request.getProductId());
+            ProductInfo updateQuantity = new ProductInfo();
+            updateQuantity.setId(request.getProductId());
+            updateQuantity.setQuantity(productInfo.getQuantity() - request.getQuantity());
+            productInfoMapper.updateByPrimaryKeySelective(updateQuantity);
+
+            //删减购物车信息
+            buyCarMapper.deleteByPrimaryKey(request.getId());
+
+        }
+
+        //用户余额减少
+        UserInfo updateBalance = new UserInfo();
+        updateBalance.setId(uid);
+        updateBalance.setBalance(userInfo.getBalance() - count);
+        userInfoMapper.updateByPrimaryKeySelective(updateBalance);
+
+        //发邮件通知
+        //TODO
+
+        return 0;
+    }
+
+    @Override
+    public List<BuyCarResponse> getBuyCars(String accessToken) {
+        TokenCache tokenCache = tokenCacheService.getCache(accessToken);
+        if (tokenCache == null) {
+            return null;
+        }
+        int uid = tokenCache.getUid();
+        BuyCarExample query = new BuyCarExample();
+        query.createCriteria().andUserIdEqualTo(uid);
+        List<BuyCar> buyCars = buyCarMapper.selectByExample(query);
+        return convertBuyCars(buyCars);
+    }
+
+    @Override
+    public void addBuyCard(BuyCar buyCar) {
+        buyCarMapper.insert(buyCar);
+    }
+
+    @Override
+    public void deleteBuyCa(Integer id) {
+        buyCarMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public void updateBuyCar(BuyCar buyCar) {
+        buyCarMapper.updateByPrimaryKey(buyCar);
+    }
+
+    private List<BuyCarResponse> convertBuyCars(List<BuyCar> buyCars) {
+        if (CollectionUtils.isEmpty(buyCars)) {
+            return null;
+        }
+        return buyCars.stream().map(
+                buyCar -> {
+                    BuyCarResponse buyCarResponse = new BuyCarResponse();
+                    BeanUtils.copyProperties(buyCar, buyCarResponse);
+                    buyCarResponse.setProductName(productInfoMapper.selectByPrimaryKey(buyCar.getProductId()).getProductName());
+                    return buyCarResponse;
+                }
+        ).collect(Collectors.toList());
+    }
+
+
+    private List<TradeResponse> convertTrade(List<TradeInfo> tradeInfos, TokenCache tokenCache) {
+        if (CollectionUtils.isEmpty(tradeInfos)) {
+            return null;
+        }
+        return tradeInfos.stream().map(
+                tradeInfo -> {
+                    TradeResponse tradeResponse = new TradeResponse();
+                    BeanUtils.copyProperties(tradeInfo, tradeResponse);
+                    if (tradeInfo.getProductId() != null) {
+                        ProductInfo productInfo = productInfoMapper.selectByPrimaryKey(tradeInfo.getProductId());
+                        tradeResponse.setProductInfo(productInfo);
+                    }
+                    if (tokenCache != null) {
+                        tradeResponse.setUserName(tokenCache.getUserName());
+                    }
+                    return tradeResponse;
+                }
+        ).collect(Collectors.toList());
     }
 }

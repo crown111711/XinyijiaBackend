@@ -14,6 +14,12 @@ import java.util.List;
 @Service
 public interface NewsService {
     void addNews(NewsInfo newsInfo);
+
     List<NewsResponse> getNews(String category);
+
     void deleteNews(Integer id);
+
+    void updateNews(NewsInfo newsInfo);
+
+    NewsResponse getNewsById(Integer id);
 }

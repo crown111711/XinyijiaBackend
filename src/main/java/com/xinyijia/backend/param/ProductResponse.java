@@ -110,4 +110,6 @@ public class ProductResponse {
      */
     private boolean selling;
 
+    private Long sellNum;
+
 }

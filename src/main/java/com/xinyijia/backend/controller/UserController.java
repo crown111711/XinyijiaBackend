@@ -2,7 +2,10 @@ package com.xinyijia.backend.controller;
 
 import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
+import com.xinyijia.backend.domain.BuyCar;
 import com.xinyijia.backend.param.request.LoginRequest;
+import com.xinyijia.backend.param.request.RechargeRequest;
+import com.xinyijia.backend.param.request.TradeRequest;
 import com.xinyijia.backend.param.request.UserUpdateRequest;
 import com.xinyijia.backend.param.response.BaseResponse;
 import com.xinyijia.backend.param.response.CaptchaResponse;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by tanjia on 2018/5/12.
@@ -103,6 +107,98 @@ public class UserController {
             log.error("更新用户信息异常", e);
             return fail(new BaseResponse());
         }
+    }
+
+    @ApiOperation(value = "充值", notes = "")
+    @RequestMapping(value = "recharge", method = RequestMethod.POST)
+    @NotNull
+    public BaseResponse recharge(@RequestBody RechargeRequest rechargeRequest) {
+
+        BaseResponse baseResponse = BaseResponse.success();
+        userService.recharge(rechargeRequest);
+        return baseResponse;
+    }
+
+    @ApiOperation(value = "得到用户的交易信息", notes = "")
+    @RequestMapping(value = "getUserTrades", method = RequestMethod.GET)
+    @NotNull
+    public BaseResponse getUserTrades(@RequestParam("accessToken") String accessToken) {
+
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setData(userService.getTradesInfos(accessToken));
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "得到用户的购物车信息", notes = "")
+    @RequestMapping(value = "getBuyCars", method = RequestMethod.GET)
+    @NotNull
+    public BaseResponse getBuyCars(@RequestParam("accessToken") String accessToken) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setData(userService.getBuyCars(accessToken));
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "添加到购物车", notes = "")
+    @RequestMapping(value = "addBuyCar", method = RequestMethod.POST)
+    @NotNull
+    public BaseResponse addBuyCar(@RequestBody BuyCar buyCar) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            userService.addBuyCard(buyCar);
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+
+    @ApiOperation(value = "删除购物车", notes = "")
+    @RequestMapping(value = "/deleteBuyCar/{id}", method = RequestMethod.GET)
+    @NotNull
+    public BaseResponse deleteBuyCar(@PathVariable("id") Integer id) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            userService.deleteBuyCa(id);
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "更新购物车", notes = "")
+    @RequestMapping(value = "/updateBuyCar", method = RequestMethod.POST)
+    @NotNull
+    public BaseResponse updateBuyCar(@RequestBody BuyCar buyCar) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            userService.updateBuyCar(buyCar);
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+
+    @ApiOperation(value = "购买商品", notes = "")
+    @RequestMapping(value = "buyProduct", method = RequestMethod.POST)
+    @NotNull
+    public BaseResponse buyProduct(@RequestBody TradeRequest tradeRequest) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setCode(userService.buyProduct(tradeRequest));
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+
     }
 
     private BaseResponse fail(BaseResponse baseResponse) {

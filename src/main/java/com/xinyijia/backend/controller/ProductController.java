@@ -4,11 +4,8 @@ import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.domain.BusinessInfo;
 import com.xinyijia.backend.domain.ProductInfo;
-import com.xinyijia.backend.param.BusinessResponse;
 import com.xinyijia.backend.param.ProductResponse;
-import com.xinyijia.backend.param.request.LoginRequest;
 import com.xinyijia.backend.param.response.BaseResponse;
-import com.xinyijia.backend.param.response.LoginResponse;
 import com.xinyijia.backend.service.ProductService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -67,6 +63,18 @@ public class ProductController {
         return baseResponse;
     }
 
+    @ApiOperation(value = "推荐商品", notes = "")
+    @RequestMapping(value = "recommendProduct", method = RequestMethod.GET)
+    public BaseResponse recommendProduct(@RequestParam(name = "accessToken", required = false) String accessToken) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setData(productService.recommendProducts(accessToken));
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
     @ApiOperation(value = "删除产品", notes = "")
     @RequestMapping(value = "/deleteProduct", method = RequestMethod.GET)
     public BaseResponse deleteProduct(@RequestParam("id") Integer id) {
@@ -110,6 +118,22 @@ public class ProductController {
             baseResponse.setCode(BusinessResponseCode.ERROR);
         }
         return baseResponse;
+    }
+
+
+    @ApiOperation(value = "查询产品", notes = "")
+    @RequestMapping(value = "/getProductsInBusiness", method = RequestMethod.GET)
+    public BaseResponse getProductsInBusiness(@RequestParam(name = "businessName", required = false) String businessName,
+                                              @RequestParam(name = "businessId", required = false) Integer businessId,
+                                              @RequestParam(name = "productId", required = false) Integer productId) {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setData(productService.getProductInBusiness(businessName, businessId, productId));
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+
     }
 
 
