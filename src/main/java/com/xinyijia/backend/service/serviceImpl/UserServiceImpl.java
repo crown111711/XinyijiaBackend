@@ -2,6 +2,7 @@ package com.xinyijia.backend.service.serviceImpl;
 
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.common.UserCategory;
+import com.xinyijia.backend.common.XinyijiaException;
 import com.xinyijia.backend.domain.*;
 import com.xinyijia.backend.mapper.BuyCarMapper;
 import com.xinyijia.backend.mapper.ProductInfoMapper;
@@ -276,8 +277,11 @@ public class UserServiceImpl implements UserService {
             ProductInfo productInfo = productInfoMapper.selectByPrimaryKey(request.getProductId());
             ProductInfo updateQuantity = new ProductInfo();
             updateQuantity.setId(request.getProductId());
+            if (productInfo.getQuantity() < request.getQuantity()) {
+                throw new XinyijiaException();
+            }
             updateQuantity.setQuantity(productInfo.getQuantity() - request.getQuantity());
-            updateQuantity.setSellNum(productInfo.getSellNum() + updateQuantity.getSellNum());
+            updateQuantity.setSellNum(productInfo.getSellNum() + request.getQuantity());
             productInfoMapper.updateByPrimaryKeySelective(updateQuantity);
 
             //删减购物车信息
@@ -323,6 +327,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateBuyCar(BuyCar buyCar) {
         buyCarMapper.updateByPrimaryKey(buyCar);
+    }
+
+    @Override
+    public Integer updateUserImageIcon(UserUpdateRequest userUpdateRequest) {
+
+        try {
+            if (userUpdateRequest == null || StringUtils.isEmpty(userUpdateRequest.getAccessToken())) {
+                return BusinessResponseCode.USER_NOT_LOGIN;
+            }
+            TokenCache tokenCache = tokenCacheService.getCache(userUpdateRequest.getAccessToken());
+            if (tokenCache == null || !Objects.equals(userUpdateRequest.getUserName(), userUpdateRequest.getUserName())) {
+                return BusinessResponseCode.USER_NOT_LOGIN;
+            }
+            int uid = tokenCache.getUid();
+            UserInfo update = new UserInfo();
+            update.setId(uid);
+            update.setImageIcon(userUpdateRequest.getImageIcon());
+            userInfoMapper.updateByPrimaryKeySelective(update);
+            return BusinessResponseCode.SUCCESS;
+        } catch (Exception e) {
+            return BusinessResponseCode.ERROR;
+        }
     }
 
     private List<BuyCarResponse> convertBuyCars(List<BuyCar> buyCars) {

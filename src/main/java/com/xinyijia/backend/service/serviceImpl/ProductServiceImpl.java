@@ -72,28 +72,36 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponse> searchProducts(String searchIndex, String searchBusiness) {
         ProductInfoExample productInfoExample = new ProductInfoExample();
+        boolean businessSure = false;
+        ProductInfoExample.Criteria criteria = null;
         if (StringUtils.isNotBlank(searchBusiness) && !Objects.equals("全部商品", searchBusiness)) {
             BusinessInfoExample query = new BusinessInfoExample();
             query.createCriteria().andBusinessNameEqualTo(searchBusiness);
             List<BusinessInfo> businessInfos = businessInfoMapper.selectByExample(query);
             if (CollectionUtils.isEmpty(businessInfos)) {
-                return null;
+                return Lists.newArrayList();
             }
             int bzId = businessInfos.get(0).getId();
-            productInfoExample.createCriteria().andBusinessIdEqualTo(bzId);
+            criteria = productInfoExample.createCriteria().andBusinessIdEqualTo(bzId);
+            businessSure = true;
+        }
+        //对业务线进行精确查询 相关判断
+        if (!businessSure) {
+            try {
+                Integer businessId = Integer.parseInt(searchIndex);
+                productInfoExample.or().andBusinessIdEqualTo(businessId);
+            } catch (Exception e) {
+                log.info("将查询条件转化成businessId失败");
+            }
+            productInfoExample.or().andProductNameLike("%" + searchIndex + "%");
+            productInfoExample.or().andCategoryLike("%" + searchIndex + "%");
+        } else {
+            criteria.andProductNameLike("%" + searchIndex + "%");
         }
 
-        try {
-            Integer businessId = Integer.parseInt(searchIndex);
-            productInfoExample.or().andBusinessIdEqualTo(businessId);
-        } catch (Exception e) {
-            log.info("将查询条件转化成businessId失败");
-        }
-        productInfoExample.or().andProductNameLike("%" + searchIndex + "%");
-        productInfoExample.or().andCategoryLike("%" + searchIndex + "%");
         List<ProductInfo> productInfos = productInfoMapper.selectByExample(productInfoExample);
         if (CollectionUtils.isEmpty(productInfos))
-            return null;
+            return Lists.newArrayList();
 
         return convertProduct(productInfos);
     }

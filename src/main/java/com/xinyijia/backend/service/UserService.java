@@ -51,4 +51,6 @@ public interface UserService {
 
     void updateBuyCar(BuyCar buyCar);
 
+    Integer updateUserImageIcon(UserUpdateRequest userUpdateRequest);
+
 }

@@ -17,4 +17,6 @@ public class BaseConsant {
 
     public static final String ADD_PRODUCT_SUCCESS = "添加商品成功";
 
+    public static final String DOWN_FILE = "download";
+
 }

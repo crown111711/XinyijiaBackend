@@ -40,7 +40,10 @@ public class NewsServiceImpl implements NewsService {
     public List<NewsResponse> getNews(String category) {
         List<NewsInfo> newsInfos = null;
         if (StringUtils.isBlank(category)) {
-            newsInfos = newsInfoMapper.selectByExampleWithBLOBs(new NewsInfoExample());
+            NewsInfoExample query = new NewsInfoExample();
+            query.createCriteria().andCategoryNotIn(Lists.newArrayList("about", "recruit"));
+            newsInfos = newsInfoMapper.selectByExampleWithBLOBs(query);
+
         } else {
             NewsInfoExample newsInfoExample = new NewsInfoExample();
             newsInfoExample.createCriteria().andCategoryEqualTo(category);
@@ -72,7 +75,7 @@ public class NewsServiceImpl implements NewsService {
 
     }
 
-    private List<NewsResponse> convert(List<NewsInfo> newsInfos) {
+    public List<NewsResponse> convert(List<NewsInfo> newsInfos) {
         return newsInfos.stream().map(
                 info -> {
                     NewsResponse response = new NewsResponse();

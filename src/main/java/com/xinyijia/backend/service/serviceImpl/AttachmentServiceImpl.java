@@ -1,5 +1,6 @@
 package com.xinyijia.backend.service.serviceImpl;
 
+import com.google.common.collect.Lists;
 import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.domain.AttachmentInfo;
 import com.xinyijia.backend.domain.AttachmentInfoExample;
@@ -7,17 +8,20 @@ import com.xinyijia.backend.domain.UserInfo;
 import com.xinyijia.backend.mapper.AttachmentInfoMapper;
 import com.xinyijia.backend.mapper.ProductInfoMapper;
 import com.xinyijia.backend.mapper.UserInfoMapper;
+import com.xinyijia.backend.param.AttachmentFile;
 import com.xinyijia.backend.param.AttachmentInfluence;
 import com.xinyijia.backend.param.TokenCache;
 import com.xinyijia.backend.service.AttachmentService;
 import com.xinyijia.backend.service.TokenCacheService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author tanjia
@@ -78,5 +82,24 @@ public class AttachmentServiceImpl implements AttachmentService {
         }
 
 
+    }
+
+    @Override
+    public List<AttachmentFile> getDownFile() {
+        AttachmentInfoExample query = new AttachmentInfoExample();
+        query.createCriteria().andCategoryEqualTo(BaseConsant.DOWN_FILE);
+        List<AttachmentInfo> infos = attachmentInfoMapper.selectByExample(query);
+        if (CollectionUtils.isEmpty(infos)) {
+            return Lists.newArrayList();
+        }
+        return infos.stream().map(info -> {
+            AttachmentFile attachmentFile = new AttachmentFile();
+            BeanUtils.copyProperties(info, attachmentFile);
+            if(StringUtils.isEmpty(attachmentFile.getOldName())){
+                attachmentFile.setOldName(attachmentFile.getFileName());
+            }
+            attachmentFile.setFileUrl("http://localhost:8090/xyj/api/attachment/showImage/" + info.getFileName());
+            return attachmentFile;
+        }).collect(Collectors.toList());
     }
 }

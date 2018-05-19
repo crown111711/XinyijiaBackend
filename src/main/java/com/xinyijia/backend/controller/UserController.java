@@ -2,6 +2,7 @@ package com.xinyijia.backend.controller;
 
 import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
+import com.xinyijia.backend.common.XinyijiaException;
 import com.xinyijia.backend.domain.BuyCar;
 import com.xinyijia.backend.param.request.LoginRequest;
 import com.xinyijia.backend.param.request.RechargeRequest;
@@ -107,6 +108,21 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "修改用户头像", notes = "")
+    @RequestMapping(value = "/updateUserInfoImageIcon", method = RequestMethod.POST)
+    @NotNull
+    public BaseResponse updateUserInfoImageIcon(UserUpdateRequest request){
+        try {
+            Integer code = userService.updateUserImageIcon(request);
+            BaseResponse response = new BaseResponse();
+            response.setCode(code);
+            return response;
+        } catch (Exception e) {
+            log.error("更新用户信息异常", e);
+            return fail(new BaseResponse());
+        }
+    }
+
     @ApiOperation(value = "充值", notes = "")
     @RequestMapping(value = "recharge", method = RequestMethod.POST)
     @NotNull
@@ -192,7 +208,11 @@ public class UserController {
             BaseResponse baseResponse = BaseResponse.success();
             baseResponse.setCode(userService.buyProduct(tradeRequest));
             return baseResponse;
-        } catch (Exception e) {
+        } catch (XinyijiaException xinyijia){
+            return new BaseResponse(3);
+        }
+        catch (Exception e) {
+            log.error("购买产品异常",e);
             return new BaseResponse(BusinessResponseCode.ERROR);
         }
 

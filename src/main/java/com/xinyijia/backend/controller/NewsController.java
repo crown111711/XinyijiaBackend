@@ -1,5 +1,6 @@
 package com.xinyijia.backend.controller;
 
+import com.google.common.collect.Lists;
 import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.domain.NewsInfo;
@@ -10,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,11 +43,11 @@ public class NewsController {
 
     @ApiOperation(value = "修改新闻", notes = "")
     @RequestMapping(value = "/updateNews", method = RequestMethod.POST)
-    public BaseResponse updateNews(@RequestBody NewsInfo newsInfo){
-        try{
+    public BaseResponse updateNews(@RequestBody NewsInfo newsInfo) {
+        try {
             newsService.updateNews(newsInfo);
             return new BaseResponse(BusinessResponseCode.SUCCESS);
-        }catch (Exception e){
+        } catch (Exception e) {
             return new BaseResponse(BusinessResponseCode.ERROR);
         }
     }
@@ -53,12 +55,15 @@ public class NewsController {
     @ApiOperation(value = "获取新闻", notes = "")
     @RequestMapping(value = "/getNews", method = RequestMethod.GET)
     public BaseResponse getNews(@RequestParam(name = "category", required = false) String category,
-                                @RequestParam(name = "lastId",required = false)Integer lastId,
-                                @RequestParam(name = "pageSize",required = false)Integer pageSize,
-                                @RequestParam(name = "direction",required = false)String direction) {
+                                @RequestParam(name = "lastId", required = false) Integer lastId,
+                                @RequestParam(name = "pageSize", required = false) Integer pageSize,
+                                @RequestParam(name = "direction", required = false) String direction) {
         try {
             BaseResponse baseResponse = new BaseResponse();
             List<NewsResponse> newsResponseList = newsService.getNews(category);
+            if (CollectionUtils.isEmpty(newsResponseList)) {
+                newsResponseList = Lists.newArrayList();
+            }
             baseResponse.setData(newsResponseList);
             baseResponse.setCode(BusinessResponseCode.SUCCESS);
             return baseResponse;

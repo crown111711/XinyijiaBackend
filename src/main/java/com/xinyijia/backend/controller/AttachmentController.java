@@ -1,8 +1,10 @@
 package com.xinyijia.backend.controller;
 
 import com.xinyijia.backend.common.BaseConsant;
+import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.domain.AttachmentInfo;
 import com.xinyijia.backend.param.AttachmentInfluence;
+import com.xinyijia.backend.param.response.BaseResponse;
 import com.xinyijia.backend.service.AttachmentService;
 import com.xinyijia.backend.utils.FilePathUtil;
 import io.swagger.annotations.Api;
@@ -64,6 +66,7 @@ public class AttachmentController {
 
             int index = fileName.indexOf(".");
             AttachmentInfo attachment = new AttachmentInfo();
+            attachment.setOldName(originalFilename);
             attachment.setFileSize(String.valueOf(file.getSize()));
             attachment.setFileAddress(filePath);
             attachment.setFileName(fileName);
@@ -77,7 +80,7 @@ public class AttachmentController {
                 attachmentService.catToRelative(influence);
                 attachmentService.catToRelative(influence);
             }
-            return "http://localhost:8090/xyj/api/attachment/showImage/"+fileName;
+            return "http://localhost:8090/xyj/api/attachment/showImage/" + fileName;
         }
         return null;
     }
@@ -98,6 +101,7 @@ public class AttachmentController {
                 MultipartFile file = multiRequest.getFile(iterator.next());
                 if (file != null) {
                     String fileName = file.getOriginalFilename();
+                    String originName = file.getOriginalFilename();
 
                     String path = FilePathUtil.getRootPath();
                     System.out.println(path);
@@ -119,6 +123,7 @@ public class AttachmentController {
                     System.out.println(index);
                     //String fileType=fileName.substring(index);
                     AttachmentInfo attachment = new AttachmentInfo();
+                    attachment.setOldName(originName);
                     attachment.setFileSize(String.valueOf(file.getSize()));
                     attachment.setFileAddress(path);
                     attachment.setFileName(fileName);
@@ -143,10 +148,10 @@ public class AttachmentController {
     @ApiOperation(value = "文件展示，解决vue图片展示路径问题", notes = "")
     @RequestMapping(value = "/showImage/{imageName}", method = RequestMethod.GET)
     public String showFile(@PathVariable String imageName, HttpServletResponse response) throws Exception {
-        if(StringUtils.isEmpty(imageName)){
+        if (StringUtils.isEmpty(imageName)) {
             return null;
         }
-        if(imageName.startsWith("http://localhost:8090/xyj/api/attachment/showImage/")){
+        if (imageName.startsWith("http://localhost:8090/xyj/api/attachment/showImage/")) {
             imageName = imageName.substring(imageName.indexOf("http://localhost:8090/xyj/api/attachment/showImage/") + 1);
         }
         ServletOutputStream outputStream = null;
@@ -170,4 +175,19 @@ public class AttachmentController {
         }
         return null;
     }
+
+
+    @ApiOperation(value = "文件下载", notes = "")
+    @RequestMapping(value = "/getDownFile", method = RequestMethod.GET)
+    public BaseResponse getDownFile() {
+        try {
+            BaseResponse baseResponse = BaseResponse.success();
+            baseResponse.setData(attachmentService.getDownFile());
+            return baseResponse;
+        } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+
 }
