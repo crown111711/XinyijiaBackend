@@ -87,6 +87,10 @@ public class NewsServiceImpl implements NewsService {
                     if (info.getPublishTime() != null) {
                         response.setPublishTime(LocalDateTime.fromDateFields(new Date(info.getPublishTime())).toString(DateTimeFormat.forPattern("yyyy-MM-dd hh:mm:ss")));
                     }
+
+                    if(StringUtils.isBlank(info.getContent())){
+                        response.setContent("");
+                    }
                     return response;
                 }
 

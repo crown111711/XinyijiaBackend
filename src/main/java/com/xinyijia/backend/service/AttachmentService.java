@@ -21,4 +21,8 @@ public interface AttachmentService {
     void catToRelative(AttachmentInfluence attachmentInfluence);
 
     List<AttachmentFile> getDownFile();
+
+    void deleteAttachment(String fileName);
+
+    void updateFile(AttachmentInfo attachmentInfo);
 }

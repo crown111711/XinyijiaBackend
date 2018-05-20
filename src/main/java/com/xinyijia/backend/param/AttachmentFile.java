@@ -13,4 +13,8 @@ public class AttachmentFile {
     String fileUrl;
     String fileDesc;
     String oldName;
+    String fileType;
+    String fileSize;
+    String createTime;
+
 }

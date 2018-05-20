@@ -4,6 +4,7 @@ import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.common.BusinessResponseCode;
 import com.xinyijia.backend.domain.AttachmentInfo;
 import com.xinyijia.backend.param.AttachmentInfluence;
+import com.xinyijia.backend.param.BusinessResponse;
 import com.xinyijia.backend.param.response.BaseResponse;
 import com.xinyijia.backend.service.AttachmentService;
 import com.xinyijia.backend.utils.FilePathUtil;
@@ -47,7 +48,8 @@ public class AttachmentController {
     @RequestMapping(value = "uploadFile", method = RequestMethod.POST)
     public String uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request,
                              @RequestParam(name = "type", required = false) String type,
-                             @RequestParam(name = "accessToken", required = false) String accessToken) throws Exception {
+                             @RequestParam(name = "accessToken", required = false) String accessToken,
+                             @RequestParam(name = "category", required = false) String category) throws Exception {
 //,
         System.out.println(request.getSession().getId());
         System.out.println(type);
@@ -67,6 +69,7 @@ public class AttachmentController {
             int index = fileName.indexOf(".");
             AttachmentInfo attachment = new AttachmentInfo();
             attachment.setOldName(originalFilename);
+            attachment.setCategory(category);
             attachment.setFileSize(String.valueOf(file.getSize()));
             attachment.setFileAddress(filePath);
             attachment.setFileName(fileName);
@@ -118,6 +121,7 @@ public class AttachmentController {
                     //通过request取得参数
                     String accessToken = request.getParameter("accessToken");
                     String type = request.getParameter("type");
+                    String category = request.getParameter("category");
 
                     int index = fileName.indexOf(".");
                     System.out.println(index);
@@ -128,6 +132,7 @@ public class AttachmentController {
                     attachment.setFileAddress(path);
                     attachment.setFileName(fileName);
                     attachment.setFileType(fileName.substring(index + 1));
+                    attachment.setCategory(category);
                     attachmentService.saveAttachment(attachment);
 
                     if (!StringUtils.isEmpty(type)) {
@@ -185,6 +190,30 @@ public class AttachmentController {
             baseResponse.setData(attachmentService.getDownFile());
             return baseResponse;
         } catch (Exception e) {
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+
+    @ApiOperation(value = "文件删除", notes = "")
+    @RequestMapping(value = "/deleteFile", method = RequestMethod.GET)
+    public BaseResponse deleteFile(@RequestParam("fileName")String fileName){
+        try{
+            BaseResponse baseResponse = BaseResponse.success();
+            attachmentService.deleteAttachment(fileName);
+            return baseResponse;
+        }catch (Exception e){
+            return new BaseResponse(BusinessResponseCode.ERROR);
+        }
+    }
+//updateFile
+    @ApiOperation(value = "文件修改", notes = "")
+    @RequestMapping(value = "/updateFile", method = RequestMethod.POST)
+    public BaseResponse updateFile(@RequestBody AttachmentInfo attachmentInfo){
+        try{
+            BaseResponse baseResponse = BaseResponse.success();
+            attachmentService.updateFile(attachmentInfo);
+            return baseResponse;
+        }catch (Exception e){
             return new BaseResponse(BusinessResponseCode.ERROR);
         }
     }

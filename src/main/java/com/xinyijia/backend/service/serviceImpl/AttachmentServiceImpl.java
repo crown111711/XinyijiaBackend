@@ -14,12 +14,15 @@ import com.xinyijia.backend.param.TokenCache;
 import com.xinyijia.backend.service.AttachmentService;
 import com.xinyijia.backend.service.TokenCacheService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,11 +98,34 @@ public class AttachmentServiceImpl implements AttachmentService {
         return infos.stream().map(info -> {
             AttachmentFile attachmentFile = new AttachmentFile();
             BeanUtils.copyProperties(info, attachmentFile);
-            if(StringUtils.isEmpty(attachmentFile.getOldName())){
+            if (StringUtils.isEmpty(attachmentFile.getOldName())) {
                 attachmentFile.setOldName(attachmentFile.getFileName());
+            }
+            if(info.getCreateTime() != null){
+                attachmentFile.setCreateTime(LocalDateTime.fromDateFields(new Date(info.getCreateTime())).toString(DateTimeFormat.forPattern("yyyy-MM-dd")));
             }
             attachmentFile.setFileUrl("http://localhost:8090/xyj/api/attachment/showImage/" + info.getFileName());
             return attachmentFile;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteAttachment(String fileName) {
+        AttachmentInfoExample query = new AttachmentInfoExample();
+        query.createCriteria().andFileNameEqualTo(fileName);
+        AttachmentInfo update = new AttachmentInfo();
+        update.setCategory("delete");
+        attachmentInfoMapper.updateByExampleSelective(update, query);
+    }
+
+    @Override
+    public void updateFile(AttachmentInfo attachmentInfo) {
+        AttachmentInfoExample query = new AttachmentInfoExample();
+        query.createCriteria().andFileNameEqualTo(attachmentInfo.getFileName());
+        AttachmentInfo update = new AttachmentInfo();
+
+        //只更新fileDesc
+        update.setFileDesc(attachmentInfo.getFileDesc());
+        attachmentInfoMapper.updateByExampleSelective(update, query);
     }
 }
