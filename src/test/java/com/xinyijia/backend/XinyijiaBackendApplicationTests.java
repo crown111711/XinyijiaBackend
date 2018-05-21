@@ -2,6 +2,7 @@ package com.xinyijia.backend;
 
 import com.xinyijia.backend.domain.UserInfo;
 import com.xinyijia.backend.mapper.UserInfoMapper;
+import com.xinyijia.backend.utils.HostUtil;
 import com.xinyijia.backend.utils.MailSenderInfo;
 import com.xinyijia.backend.utils.MailUtils;
 import com.xinyijia.backend.utils.RandomUtil;
@@ -46,6 +47,11 @@ public class XinyijiaBackendApplicationTests {
 	public void testToken(){
 		RandomUtil.getGlobalToken();
 		System.out.println(System.currentTimeMillis());
+	}
+
+	@Test
+	public void testIp(){
+		System.out.println(HostUtil.getIp());
 	}
 
 	@Test

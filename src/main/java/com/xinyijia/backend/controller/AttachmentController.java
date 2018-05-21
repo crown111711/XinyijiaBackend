@@ -174,6 +174,7 @@ public class AttachmentController {
             outputStream.flush();
         } catch (Exception e) {
             log.error("传输图片错误", e);
+            return null;
         } finally {
             in.close();
             outputStream.close();
@@ -196,24 +197,25 @@ public class AttachmentController {
 
     @ApiOperation(value = "文件删除", notes = "")
     @RequestMapping(value = "/deleteFile", method = RequestMethod.GET)
-    public BaseResponse deleteFile(@RequestParam("fileName")String fileName){
-        try{
+    public BaseResponse deleteFile(@RequestParam("fileName") String fileName) {
+        try {
             BaseResponse baseResponse = BaseResponse.success();
             attachmentService.deleteAttachment(fileName);
             return baseResponse;
-        }catch (Exception e){
+        } catch (Exception e) {
             return new BaseResponse(BusinessResponseCode.ERROR);
         }
     }
-//updateFile
+
+    //updateFile
     @ApiOperation(value = "文件修改", notes = "")
     @RequestMapping(value = "/updateFile", method = RequestMethod.POST)
-    public BaseResponse updateFile(@RequestBody AttachmentInfo attachmentInfo){
-        try{
+    public BaseResponse updateFile(@RequestBody AttachmentInfo attachmentInfo) {
+        try {
             BaseResponse baseResponse = BaseResponse.success();
             attachmentService.updateFile(attachmentInfo);
             return baseResponse;
-        }catch (Exception e){
+        } catch (Exception e) {
             return new BaseResponse(BusinessResponseCode.ERROR);
         }
     }
