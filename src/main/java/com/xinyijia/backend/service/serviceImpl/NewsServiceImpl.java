@@ -1,6 +1,7 @@
 package com.xinyijia.backend.service.serviceImpl;
 
 import com.google.common.collect.Lists;
+import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.domain.NewsInfo;
 import com.xinyijia.backend.domain.NewsInfoExample;
 import com.xinyijia.backend.mapper.NewsInfoMapper;
@@ -81,7 +82,7 @@ public class NewsServiceImpl implements NewsService {
                     NewsResponse response = new NewsResponse();
                     BeanUtils.copyProperties(info, response);
                     if (StringUtils.isNotBlank(info.getTitleImage())) {
-                        response.setImageUrl("http://localhost:8090/xyj/api/attachment/showImage/" + info.getTitleImage());
+                        response.setImageUrl(BaseConsant.SHOW_IMAGE + info.getTitleImage());
                     }
 
                     if (info.getPublishTime() != null) {

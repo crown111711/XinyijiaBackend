@@ -19,4 +19,6 @@ public class BaseConsant {
 
     public static final String DOWN_FILE = "download";
 
+    public static final String SHOW_IMAGE = "http://localhost:8090/xyj/api/attachment/showImage/";
+
 }

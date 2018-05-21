@@ -104,7 +104,7 @@ public class AttachmentServiceImpl implements AttachmentService {
             if(info.getCreateTime() != null){
                 attachmentFile.setCreateTime(LocalDateTime.fromDateFields(new Date(info.getCreateTime())).toString(DateTimeFormat.forPattern("yyyy-MM-dd")));
             }
-            attachmentFile.setFileUrl("http://localhost:8090/xyj/api/attachment/showImage/" + info.getFileName());
+            attachmentFile.setFileUrl(BaseConsant.SHOW_IMAGE+ info.getFileName());
             return attachmentFile;
         }).collect(Collectors.toList());
     }

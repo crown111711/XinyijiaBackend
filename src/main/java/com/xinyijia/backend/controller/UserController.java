@@ -36,14 +36,14 @@ public class UserController {
     private UserService userService;
 
     @ApiOperation(value = "登陆", notes = "")
-    @RequestMapping(value = "login", method = RequestMethod.POST)
-    public LoginResponse login(@RequestBody LoginRequest loginRequest, HttpSession httpSession) {
-        loginRequest.setSessionId(httpSession.getId());
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+       // loginRequest.setSessionId(httpSession.getId());
         return userService.login(loginRequest);
     }
 
     @ApiOperation(value = "注册", notes = "")
-    @RequestMapping(value = "register", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public CaptchaResponse register(@RequestBody LoginRequest loginRequest) {
         log.info("userName:{},password:{},email:{}", loginRequest.getUserName(),
                 loginRequest.getPassword(), loginRequest.getEmail());
@@ -54,14 +54,14 @@ public class UserController {
     }
 
     @ApiOperation(value = "验证是否已经登陆", notes = "")
-    @RequestMapping(value = "isLogin", method = RequestMethod.GET)
+    @RequestMapping(value = "/isLogin", method = RequestMethod.GET)
     public boolean isLogin(@RequestParam(name = "accessToken", required = false) String accessToken) {
         return userService.isLogin(accessToken);
     }
 
 
     @ApiOperation(value = "验证码生成并发送", notes = "")
-    @RequestMapping(value = "getCaptcha", method = RequestMethod.POST)
+    @RequestMapping(value = "/getCaptcha", method = RequestMethod.POST)
     public CaptchaResponse getCaptcha(@RequestBody LoginRequest loginRequest) {
         CaptchaResponse captchaResponse = new CaptchaResponse();
         try {
@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "获取用户信息", notes = "")
-    @RequestMapping(value = "getUserInfo", method = RequestMethod.GET)
+    @RequestMapping(value = "/getUserInfo", method = RequestMethod.GET)
     @NotNull
     public UserInfoResponse getUserInfo(@RequestParam("accessToken") String accessToken) {
         try {
@@ -94,7 +94,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改用户信息", notes = "")
-    @RequestMapping(value = "updateUserInfo", method = RequestMethod.POST)
+    @RequestMapping(value = "/updateUserInfo", method = RequestMethod.POST)
     @NotNull
     public BaseResponse updateUserInfo(@RequestBody UserUpdateRequest request) {
         try {
@@ -124,7 +124,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "充值", notes = "")
-    @RequestMapping(value = "recharge", method = RequestMethod.POST)
+    @RequestMapping(value = "/recharge", method = RequestMethod.POST)
     @NotNull
     public BaseResponse recharge(@RequestBody RechargeRequest rechargeRequest) {
 

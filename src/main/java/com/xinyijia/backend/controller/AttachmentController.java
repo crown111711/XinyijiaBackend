@@ -83,7 +83,7 @@ public class AttachmentController {
                 attachmentService.catToRelative(influence);
                 attachmentService.catToRelative(influence);
             }
-            return "http://localhost:8090/xyj/api/attachment/showImage/" + fileName;
+            return BaseConsant.SHOW_IMAGE + fileName;
         }
         return null;
     }
@@ -156,8 +156,8 @@ public class AttachmentController {
         if (StringUtils.isEmpty(imageName)) {
             return null;
         }
-        if (imageName.startsWith("http://localhost:8090/xyj/api/attachment/showImage/")) {
-            imageName = imageName.substring(imageName.indexOf("http://localhost:8090/xyj/api/attachment/showImage/") + 1);
+        if (imageName.startsWith(BaseConsant.SHOW_IMAGE)) {
+            imageName = imageName.substring(imageName.indexOf(BaseConsant.SHOW_IMAGE) + 1);
         }
         ServletOutputStream outputStream = null;
         FileInputStream in = null;

@@ -45,7 +45,7 @@ public class XinyijiaBackendApplicationTests {
 	@Test
 	public void testToken(){
 		RandomUtil.getGlobalToken();
-
+		System.out.println(System.currentTimeMillis());
 	}
 
 	@Test

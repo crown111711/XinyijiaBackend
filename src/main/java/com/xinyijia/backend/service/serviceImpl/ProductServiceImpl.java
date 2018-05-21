@@ -1,6 +1,7 @@
 package com.xinyijia.backend.service.serviceImpl;
 
 import com.google.common.collect.Lists;
+import com.xinyijia.backend.common.BaseConsant;
 import com.xinyijia.backend.domain.*;
 import com.xinyijia.backend.mapper.BusinessInfoMapper;
 import com.xinyijia.backend.mapper.ProductInfoMapper;
@@ -168,7 +169,7 @@ public class ProductServiceImpl implements ProductService {
                     ProductResponse response = new ProductResponse();
                     BeanUtils.copyProperties(p, response);
                     if (StringUtils.isNotBlank(p.getImageName())) {
-                        response.setImageUrl("http://localhost:8090/xyj/api/attachment/showImage/" + p.getImageName());
+                        response.setImageUrl(BaseConsant.SHOW_IMAGE + p.getImageName());
                     }
                     if (p.getBusinessId() != null) {
                         response.setBusinessName(businessInfoMapper.selectByPrimaryKey(p.getBusinessId()).getBusinessName());
