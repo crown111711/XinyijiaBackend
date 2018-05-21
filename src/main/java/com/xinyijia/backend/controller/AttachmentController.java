@@ -81,7 +81,7 @@ public class AttachmentController {
                 influence.setType(type);
                 influence.setAccessToken(accessToken);
                 attachmentService.catToRelative(influence);
-                attachmentService.catToRelative(influence);
+                //attachmentService.catToRelative(influence);
             }
             return BaseConsant.SHOW_IMAGE + fileName;
         }

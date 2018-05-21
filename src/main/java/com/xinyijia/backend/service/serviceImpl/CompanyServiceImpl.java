@@ -40,7 +40,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public CompanyInfo getCompany() {
-        List<CompanyInfo> infos = companyInfoMapper.selectByExample(new CompanyInfoExample());
+        List<CompanyInfo> infos = companyInfoMapper.selectByExampleWithBLOBs(new CompanyInfoExample());
         if (CollectionUtils.isEmpty(infos))
             return new CompanyInfo();
         return infos.get(0);
@@ -64,7 +64,7 @@ public class CompanyServiceImpl implements CompanyService {
         if (companyInfo.getId() == null) {
             companyInfoMapper.insert(companyInfo);
         } else {
-            companyInfoMapper.updateByPrimaryKey(companyInfo);
+            companyInfoMapper.updateByPrimaryKeyWithBLOBs(companyInfo);
         }
     }
 
