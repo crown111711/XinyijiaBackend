@@ -14,12 +14,17 @@ public class MailSenderInfo {
     private String mailServerHost = "smtp.qq.com";
     private String mailServerPort = "587";
     // 邮件发送者的地址
-    private String fromAddress = "378097217@qq.com";
+    private String fromAddress = "1508278816@qq.com";
+
+    //tbtprwxisnbhgiaa
     // 邮件接收者的地址
     private String[] toAddress;
     // 登陆邮件发送服务器的用户名和密码
-    private String userName = "378097217@qq.com";
-    private String password = "ihwuelaoegbmbged";
+    private String userName = "1508278816@qq.com";
+    private String password = "tbtprwxisnbhgiaa";
+
+     //tanjia
+              //"378097217@qq.com";
             //"hbevgcwmbvkebhga";  旧
               //ihwuelaoegbmbged 新
     //Qwert51
