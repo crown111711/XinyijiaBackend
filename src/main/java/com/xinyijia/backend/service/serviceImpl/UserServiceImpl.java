@@ -219,8 +219,13 @@ public class UserServiceImpl implements UserService {
             return BusinessResponseCode.USER_NOT_LOGIN;
         }
         int uid = tokenCache.getUid();
+        UserInfo origin = userInfoMapper.selectByPrimaryKey(uid);
+        Long account = origin.getBalance();
+        if (account == null) {
+            account = 0L;
+        }
         UserInfo update = new UserInfo();
-        update.setBalance(rechargeRequest.getBalance());
+        update.setBalance(rechargeRequest.getBalance() + account);
         update.setId(uid);
         userInfoMapper.updateByPrimaryKeySelective(update);
         return 0;
@@ -281,7 +286,7 @@ public class UserServiceImpl implements UserService {
                 throw new XinyijiaException();
             }
             updateQuantity.setQuantity(productInfo.getQuantity() - request.getQuantity());
-            updateQuantity.setSellNum(productInfo.getSellNum() + request.getQuantity());
+            updateQuantity.setSellNum((productInfo.getSellNum() == null ? 0 : productInfo.getSellNum()) + request.getQuantity());
             productInfoMapper.updateByPrimaryKeySelective(updateQuantity);
 
             //删减购物车信息

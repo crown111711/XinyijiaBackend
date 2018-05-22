@@ -90,7 +90,7 @@ public class MailUtils {
             return true;
 
         } catch (MessagingException e) {
-            log.error("send mail fail toAddresss{}");
+            log.error("send mail fail toAddresss{}",e);
         }
         return false;
     }

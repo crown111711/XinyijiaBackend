@@ -43,6 +43,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void addProduct(ProductInfo productInfo) {
+        if (productInfo.getSellNum() == null) {
+            productInfo.setSellNum(0L);
+        }
         productInfo.setCreateTime(System.currentTimeMillis());
         productInfoMapper.insert(productInfo);
     }
@@ -96,8 +99,11 @@ public class ProductServiceImpl implements ProductService {
             }
             productInfoExample.or().andProductNameLike("%" + searchIndex + "%");
             productInfoExample.or().andCategoryLike("%" + searchIndex + "%");
+            productInfoExample.or().andSearchIndexLike("%" + searchIndex + "%");
         } else {
             criteria.andProductNameLike("%" + searchIndex + "%");
+//            criteria.andCategoryLike("%" + searchIndex + "%");
+//            criteria.andSearchIndexLike("%" + searchIndex + "%");
         }
 
         List<ProductInfo> productInfos = productInfoMapper.selectByExample(productInfoExample);

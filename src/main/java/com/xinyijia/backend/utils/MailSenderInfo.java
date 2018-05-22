@@ -19,7 +19,9 @@ public class MailSenderInfo {
     private String[] toAddress;
     // 登陆邮件发送服务器的用户名和密码
     private String userName = "378097217@qq.com";
-    private String password = "hbevgcwmbvkebhga";
+    private String password = "ihwuelaoegbmbged";
+            //"hbevgcwmbvkebhga";  旧
+              //ihwuelaoegbmbged 新
     //Qwert51
     // 是否需要身份验证
     private boolean validate = true;
